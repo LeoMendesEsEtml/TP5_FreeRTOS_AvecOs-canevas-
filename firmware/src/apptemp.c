@@ -128,6 +128,8 @@ void APPTEMP_Initialize (void)
 
     /* on démarre vide */
     xSemaphoreTake(apptempData.xTempSem, 0);
+    DRV_TMR0_Start();
+    DRV_TMR1_Start();
 }
 
 
@@ -190,9 +192,3 @@ void APPTEMP_Tasks ( void )
         }
     }
 }
-
- 
-
-/*******************************************************************************
- End of File
- */

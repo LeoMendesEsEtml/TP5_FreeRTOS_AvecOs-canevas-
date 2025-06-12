@@ -74,8 +74,8 @@ extern APPTEMP_DATA apptempData;    // déjà déclaré dans apptemp.c
 // Section: System Interrupt Vector Functions
 // *****************************************************************************
 // *****************************************************************************
-
-void IntHandlerDrvUsartInstance0(void) {
+void IntHandlerDrvUsartInstance0(void)
+{
     DRV_USART_TasksTransmit(sysObj.drvUsart0);
     DRV_USART_TasksError(sysObj.drvUsart0);
     DRV_USART_TasksReceive(sysObj.drvUsart0);
@@ -91,31 +91,36 @@ void IntHandlerDrvUsartInstance0(void) {
     }
     portEND_SWITCHING_ISR(xHPTaskWoken);
 }
-
- 
- 
-
- 
-
- 
-
- 
-
- 
-
- 
- 
- 
-
+/* === Timer 2 : instance 0  ============================================= */
 void IntHandlerDrvTmrInstance0(void)
 {
-    BaseType_t xHPTaskWoken = pdFALSE;
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    xSemaphoreGiveFromISR(apptempData.xTempSem, &xHPTaskWoken);
+    /* 1) ton code applicatif  ------------------------------------------ */
+    xSemaphoreGiveFromISR(apptempData.xTempSem, &xHigherPriorityTaskWoken);
+
+    /* (optionnel) témoin visuel */
+    BSP_LEDToggle(BSP_LED_3);
+
+    /* 2) Clear du flag matériel  --------------------------------------- */
     PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_TIMER_2);
 
-    portEND_SWITCHING_ISR(xHPTaskWoken);
+    /* 3) éventuel changement de contexte ------------------------------- */
+    portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 }
+
+/* === Timer 3 : instance 1  ============================================= */
+void IntHandlerDrvTmrInstance1(void)
+{
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    /* Action spécifique à ce timer (si besoin) */
+    xSemaphoreGiveFromISR(apptempData.xTempSem, &xHigherPriorityTaskWoken);
+
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_TIMER_3);
+    portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+}
+
  /*******************************************************************************
  End of File
 */
