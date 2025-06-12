@@ -58,7 +58,9 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdlib.h>
 #include "system_config.h"
 #include "system_definitions.h"
-
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "semphr.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -73,6 +75,20 @@ extern "C" {
 // Section: Type Definitions
 // *****************************************************************************
 // *****************************************************************************
+#define APP_QUEUE_LENGTH   32
+
+typedef enum { MSG_TEMP, MSG_UART_CHAR } APP_MSG_TYPE;
+
+typedef struct
+{
+    APP_MSG_TYPE type;
+    union {
+        float f;      // température en °C
+        char  c;      // caractère reçu
+    } data;
+} APP_MESSAGE;
+
+extern QueueHandle_t gAppQueue;     // utilisable par les autres modules
 
 // *****************************************************************************
 /* Application states
@@ -111,11 +127,9 @@ typedef enum
 
 typedef struct
 {
-    /* The application's current state */
-    APPTEMP_STATES state;
-
-    /* TODO: Define any additional data used by the application. */
-
+    APPTEMP_STATES  state;
+    QueueHandle_t   xQueue;
+    SemaphoreHandle_t xTempSem;
 } APPTEMP_DATA;
 
 

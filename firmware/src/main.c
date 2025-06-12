@@ -59,7 +59,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include <stdbool.h>                    // Defines true
 #include <stdlib.h>                     // Defines EXIT_FAILURE
 #include "system/common/sys_module.h"
-#include "task.h"   // SYS function prototypes
+#include "FreeRTOS.h"
+#include "task.h"          // ou queue.h, semphr.h, 
 
 
 // *****************************************************************************
@@ -78,9 +79,7 @@ int main ( void )
     {
         /* Maintain state machines of all polled MPLAB Harmony modules. */
         SYS_Tasks ( );
-        xTaskCreate((TaskFunction_t) SYS_Tasks, "Sys Tasks", 1024, NULL, 1, NULL);        
-        xTaskCreate((TaskFunction_t) APPLCD_Tasks, "AppLcd Tasks", 1024, NULL, 1, NULL);
-        xTaskCreate((TaskFunction_t) APPTEMP_Tasks, "AppTemp Tasks", 1024, NULL, 1, NULL);
+
     }
 
     /* Execution should not come here during normal operation */

@@ -55,6 +55,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 #include "applcd.h"
 #include "Mc32DriverLcd.h"
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "apptemp.h"       // pour gAppQueue & APP_MESSAGE
+extern QueueHandle_t gAppQueue;
 
 
 // *****************************************************************************
@@ -76,7 +80,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     This structure should be initialized by the APP_Initialize function.
     
     Application strings and buffers are be defined outside this structure.
-*/
+ */
 
 APPLCD_DATA applcdData;
 
@@ -88,7 +92,7 @@ APPLCD_DATA applcdData;
 // *****************************************************************************
 
 /* TODO:  Add any necessary callback functions.
-*/
+ */
 
 // *****************************************************************************
 // *****************************************************************************
@@ -112,14 +116,12 @@ APPLCD_DATA applcdData;
     See prototype in applcd.h.
  */
 
-void APPLCD_Initialize ( void )
-{
+void APPLCD_Initialize(void) {
     /* Place the App state machine in its initial state. */
     applcdData.state = APPLCD_STATE_INIT;
 
-    
-}
 
+}
 
 /******************************************************************************
   Function:
@@ -129,24 +131,25 @@ void APPLCD_Initialize ( void )
     See prototype in applcd.h.
  */
 
-void APPLCD_Tasks ( void )
-{
+void APPLCD_Tasks(void) {
 
     /* Check the application's current state. */
-    switch ( applcdData.state )
-    {
-        /* Application's initial state. */
+    switch (applcdData.state) {
+            /* Application's initial state. */
         case APPLCD_STATE_INIT:
         {
             //init LCD + affichage message
             lcd_init();
+            lcd_bl_on();
             printf_lcd("EMSY3 TP5 FreeRTOS");
-            lcd_gotoxy(1,2);
-            printf_lcd("<VOS NOMS>");
-            
-            
+            lcd_gotoxy(1, 2);
+            printf_lcd("Leo Mendes");
+            lcd_gotoxy(1, 3);
+            printf_lcd("Mathieu Bucher");
+
+
             // ... A COMPLETER ICI...
-            
+
             applcdData.state = APPLCD_STATE_SERVICE_TASKS;
 
             break;
@@ -155,20 +158,33 @@ void APPLCD_Tasks ( void )
         case APPLCD_STATE_SERVICE_TASKS:
         {
             BSP_LEDOff(BSP_LED_2); //debug
-            
-            // ... A COMPLETER ICI...
-            
+            APP_MESSAGE msg;
 
-            
+            /*  ? 1 seule itération : _APPLCD_Tasks s?occupe du ?while(1)? ? */
+            if (xQueueReceive(gAppQueue, &msg, portMAX_DELAY) == pdTRUE) {
+                switch (msg.type) {
+                    case MSG_TEMP:
+                        lcd_gotoxy(1, 1);
+                        printf_lcd("T = %5.2f C  ", msg.data.f);
+                        break;
+
+                    case MSG_UART_CHAR:
+                        lcd_gotoxy(1, 2);
+                        lcd_putc(msg.data.c);
+                        break;
+                }
+            }
+
+
             BSP_LEDOn(BSP_LED_2); //debug
-        
+
             break;
         }
 
-        /* TODO: implement your application state machine.*/
-        
+            /* TODO: implement your application state machine.*/
 
-        /* The default state should never be executed. */
+
+            /* The default state should never be executed. */
         default:
         {
             /* TODO: Handle error in application's state machine. */
@@ -177,7 +193,7 @@ void APPLCD_Tasks ( void )
     }
 }
 
- 
+
 
 /*******************************************************************************
  End of File

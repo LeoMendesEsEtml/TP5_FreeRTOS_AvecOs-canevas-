@@ -63,19 +63,35 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "apptemp.h"
 #include "applcd.h"
 #include "system_definitions.h"
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "semphr.h"
+
+extern APPTEMP_DATA apptempData;    // déjà déclaré dans apptemp.c
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: System Interrupt Vector Functions
 // *****************************************************************************
 // *****************************************************************************
-void IntHandlerDrvUsartInstance0(void)
-{
+
+void IntHandlerDrvUsartInstance0(void) {
     DRV_USART_TasksTransmit(sysObj.drvUsart0);
     DRV_USART_TasksError(sysObj.drvUsart0);
     DRV_USART_TasksReceive(sysObj.drvUsart0);
+    BaseType_t xHPTaskWoken = pdFALSE;
+
+    while (!DRV_USART_ReceiverBufferIsEmpty(sysObj.drvUsart0)) {
+        char c = DRV_USART_ReadByte(sysObj.drvUsart0);
+
+        APP_MESSAGE msg = {.type = MSG_UART_CHAR};
+        msg.data.c = c;
+
+        xQueueSendFromISR(apptempData.xQueue, &msg, &xHPTaskWoken);
+    }
+    portEND_SWITCHING_ISR(xHPTaskWoken);
 }
- 
+
  
  
 
@@ -93,7 +109,12 @@ void IntHandlerDrvUsartInstance0(void)
 
 void IntHandlerDrvTmrInstance0(void)
 {
-    PLIB_INT_SourceFlagClear(INT_ID_0,INT_SOURCE_TIMER_2);
+    BaseType_t xHPTaskWoken = pdFALSE;
+
+    xSemaphoreGiveFromISR(apptempData.xTempSem, &xHPTaskWoken);
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_TIMER_2);
+
+    portEND_SWITCHING_ISR(xHPTaskWoken);
 }
  /*******************************************************************************
  End of File

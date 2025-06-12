@@ -110,12 +110,26 @@ APPTEMP_DATA apptempData;
     See prototype in apptemp.h.
  */
 
-void APPTEMP_Initialize ( void )
+APPTEMP_DATA apptempData;
+QueueHandle_t gAppQueue;            // rendu global
+
+void APPTEMP_Initialize (void)
 {
-    /* Place the App state machine in its initial state. */
     apptempData.state = APPTEMP_STATE_INIT;
 
+    /* --- objets FreeRTOS --- */
+    apptempData.xTempSem = xSemaphoreCreateBinary();
+    apptempData.xQueue   = xQueueCreate(APP_QUEUE_LENGTH, sizeof(APP_MESSAGE));
+
+    configASSERT(apptempData.xTempSem && apptempData.xQueue);
+
+    /* rendre la queue visible aux autres modules */
+    gAppQueue = apptempData.xQueue;
+
+    /* on démarre vide */
+    xSemaphoreTake(apptempData.xTempSem, 0);
 }
+
 
 
 /******************************************************************************
@@ -135,9 +149,7 @@ void APPTEMP_Tasks ( void )
         /* Application's initial state. */
         case APPTEMP_STATE_INIT:
         {
-            SPI_InitLM70();
-            
-            // ... A COMPLETER ICI...   
+            SPI_InitLM70();   
             
             apptempData.state = APPTEMP_STATE_SERVICE_TASKS;
 
@@ -145,13 +157,23 @@ void APPTEMP_Tasks ( void )
         }
 
         case APPTEMP_STATE_SERVICE_TASKS:
-        {                    
+        {
             BSP_LEDOff(BSP_LED_1); //debug           
-            
-            // ... A COMPLETER ICI...
 
-            
-            
+            while (1) {
+                /* 1- Attente du sémaphore (libéré par le timer) */
+                if (xSemaphoreTake(apptempData.xTempSem, portMAX_DELAY) == pdTRUE) {
+                    /* 2- Lecture du LM70 */
+                    int16_t raw = SPI_ReadRawTempLM70();
+                    float degC;
+                    LM70_ConvRawToDeg(raw, &degC);
+
+                    /* 3- Encapsulation & 4- envoi dans la queue */
+                    APP_MESSAGE msg = {.type = MSG_TEMP};
+                    msg.data.f = degC;
+                    xQueueSend(apptempData.xQueue, &msg, 0);
+                }
+            }            
             BSP_LEDOn(BSP_LED_1); //debug
             
             break;
