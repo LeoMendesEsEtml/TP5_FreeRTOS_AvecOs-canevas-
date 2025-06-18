@@ -52,46 +52,37 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // Section: Included Files 
 // *****************************************************************************
 // *****************************************************************************
-
-#include "applcd.h"
-#include "Mc32DriverLcd.h"
-#include "apptemp.h"
-#include "queue.h"
+// Inclusion du header principal du module LCD
+#include "applcd.h" // Fonctions et types du module LCD
+// Inclusion du driver LCD
+#include "Mc32DriverLcd.h" // Fonctions d'affichage LCD
+// Inclusion du module temperature (pour coherence inter-tache)
+#include "apptemp.h" // Types partages temperature
+// Inclusion de FreeRTOS queue
+#include "queue.h" // Gestion des files d'attente FreeRTOS
 
 // *****************************************************************************
 // *****************************************************************************
 // Section: Global Data Definitions
 // *****************************************************************************
 // *****************************************************************************
-
-// *****************************************************************************
-/* Application Data
-
-  Summary:
-    Holds application data
-
-  Description:
-    This structure holds the application's data.
-
-  Remarks:
-    This structure should be initialized by the APP_Initialize function.
-    
-    Application strings and buffers are be defined outside this structure.
- */
-
-APPLCD_DATA applcdData;
-//QueueHandle_t queueTx;
-extern QueueHandle_t queueTx;
+// Declaration de la structure de donnees globale du module LCD
+APPLCD_DATA applcdData; // Donnees du module LCD
+// Declaration externe de la queue partagee
+extern QueueHandle_t queueTx; // File d'attente partagee pour messages
 
 /* essages communs (ISR <-> tâches) */
+// Definition du type enumere pour les messages inter-tache
 typedef enum { 
-    MSG_TEMP = 1, 
-    MSG_UARTRX = 2 
+    MSG_TEMP = 1, // Message de temperature
+    MSG_UARTRX = 2 // Message de reception UART
 } msg_type_t;
-#define MSG_PAYLOAD_LEN 16U
+// Definition de la taille maximale du champ texte dans un message
+#define MSG_PAYLOAD_LEN 16U // Taille du champ texte
+// Structure de message pour la communication inter-tache
 typedef struct {
-    msg_type_t type;
-    char       txt[MSG_PAYLOAD_LEN];
+    msg_type_t type; // Type de message
+    char       txt[MSG_PAYLOAD_LEN]; // Donnees du message
 } app_msg_t;
 
 /**

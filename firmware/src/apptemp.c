@@ -53,25 +53,57 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
+/*******************************************************************************
+  Inclusion du header principal du module temperature
+  Fonctions et types du module temperature
+ *******************************************************************************/
 #include "apptemp.h"
+
+/*******************************************************************************
+  Inclusion du module SPI LM70
+  Fonctions capteur LM70
+ *******************************************************************************/
 #include "Mc32gestSpiLM70.h"
+
+/*******************************************************************************
+  Inclusion de FreeRTOS semaphore
+  Gestion des semaphores FreeRTOS
+ *******************************************************************************/
 #include "semphr.h"
+
+/*******************************************************************************
+  Inclusion de FreeRTOS queue
+  Gestion des files d'attente FreeRTOS
+ *******************************************************************************/
 #include "queue.h"
+
+/*******************************************************************************
+  Inclusion des fonctions d'affichage standard
+  Fonctions d'entree/sortie standard
+ *******************************************************************************/
 #include <stdio.h>
 
-APPTEMP_DATA apptempData;
-SemaphoreHandle_t semIntTimer;
-extern QueueHandle_t queueTx;
+// Declaration de la structure de donnees globale du module temperature
+APPTEMP_DATA apptempData; // Donnees du module temperature
+// Declaration du handle de semaphore global
+SemaphoreHandle_t semIntTimer; // Semaphore pour synchronisation timer
+// Declaration externe de la queue partagee
+extern QueueHandle_t queueTx; // File d'attente partagee pour messages
 
-typedef enum { MSG_TEMP = 1, MSG_UARTRX = 2 } msg_type_t;
-#define MSG_PAYLOAD_LEN 16U
+// Definition du type enumere pour les messages inter-tache
+typedef enum { MSG_TEMP = 1, MSG_UARTRX = 2 } msg_type_t; // Types de messages
+// Definition de la taille maximale du champ texte dans un message
+#define MSG_PAYLOAD_LEN 16U // Taille du champ texte
+// Structure de message pour la communication inter-tache
 typedef struct {
-    msg_type_t type;
-    char       txt[MSG_PAYLOAD_LEN];
+    msg_type_t type; // Type de message
+    char       txt[MSG_PAYLOAD_LEN]; // Donnees du message
 } app_msg_t;
 
-QueueHandle_t queueTx = NULL;
-SemaphoreHandle_t semIntTimer = NULL; 
+// Declaration de la queue globale
+QueueHandle_t queueTx = NULL; // File d'attente globale
+// Declaration du semaphore global
+SemaphoreHandle_t semIntTimer = NULL; // Semaphore global
 
 /**
 @brief Initialise le module temperature
