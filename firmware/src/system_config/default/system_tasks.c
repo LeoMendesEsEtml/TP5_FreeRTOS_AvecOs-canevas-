@@ -177,15 +177,3 @@ static void _APPLCD_Tasks(void)
 /*******************************************************************************
  End of File
  */
-
-/**
- * @file system_tasks.c
- * @brief Gestion des tâches système et création des tâches FreeRTOS.
- *
- * @details
- * Ce fichier crée les tâches FreeRTOS pour le système, la température et l'affichage LCD,
- * puis démarre le scheduler. Il gère aussi la boucle principale de chaque tâche.
- *
- * @pre Le système doit être initialisé avant d'appeler ces fonctions.
- * @post Les tâches FreeRTOS sont lancées et le scheduler démarre.
- */

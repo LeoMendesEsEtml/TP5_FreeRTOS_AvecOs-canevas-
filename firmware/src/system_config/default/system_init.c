@@ -154,8 +154,6 @@ void SYS_Initialize ( void* data )
     /* Initialize Drivers */
     /*Initialize TMR0 */
     DRV_TMR0_Initialize();
-    /*Initialize TMR1 */
-    DRV_TMR1_Initialize();
  
      sysObj.drvUsart0 = DRV_USART_Initialize(DRV_USART_INDEX_0, (SYS_MODULE_INIT *)NULL);
     SYS_INT_VectorPrioritySet(INT_VECTOR_UART1, INT_PRIORITY_LEVEL4);
@@ -170,7 +168,6 @@ void SYS_Initialize ( void* data )
     /* Initialize Middleware */
 
     /* Initialize the Application */
-    
     APPTEMP_Initialize();
     APPLCD_Initialize();
 }

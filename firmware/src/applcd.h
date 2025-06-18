@@ -18,18 +18,6 @@
     are defined here for convenience.
 *******************************************************************************/
 
-/**
- * @file applcd.h
- * @brief Declarations pour la gestion de l'affichage LCD avec FreeRTOS
- *
- * @details
- * Ce fichier contient les prototypes, types et constantes necessaires a l'affichage LCD
- * Il definit l'interface publique du module LCD pour l'application FreeRTOS
- *
- * @pre Le module doit etre initialise avant utilisation
- * @post Permet l'affichage de messages sur le LCD via les fonctions du module
- */
-
 //DOM-IGNORE-BEGIN
 /*******************************************************************************
 Copyright (c) 2013-2014 released Microchip Technology Inc.  All rights reserved.
@@ -71,6 +59,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "system_config.h"
 #include "system_definitions.h"
 
+
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -105,6 +94,7 @@ typedef enum
 	/* TODO: Define states used by the application state machine. */
 
 } APPLCD_STATES;
+
 
 
 // *****************************************************************************
@@ -173,18 +163,6 @@ typedef struct
     This routine must be called from the SYS_Initialize function.
 */
 
-/**
- * @brief Initialise le module LCD
- *
- * @details
- * Cette fonction initialise le module LCD, place l'application dans son etat initial et prepare les objets necessaires.
- *
- * @param Aucun parametre.
- * @return Aucun retour.
- *
- * @pre Toutes les autres initialisations systeme doivent etre faites avant d'appeler cette fonction.
- * @post Le module LCD est pret a fonctionner.
- */
 void APPLCD_Initialize ( void );
 
 
@@ -218,18 +196,6 @@ void APPLCD_Initialize ( void );
     This routine must be called from SYS_Tasks() routine.
  */
 
-/**
- * @brief Tache principale de gestion de l'affichage LCD
- *
- * @details
- * Cette fonction implemente la machine d'etat et la logique principale du module LCD. Elle gere la reception des messages et l'affichage sur l'ecran LCD.
- *
- * @param Aucun parametre.
- * @return Aucun retour.
- *
- * @pre Le systeme et le module LCD doivent etre initialises avant d'appeler cette fonction.
- * @post Les messages sont affiches sur le LCD a chaque reception.
- */
 void APPLCD_Tasks( void );
 
 

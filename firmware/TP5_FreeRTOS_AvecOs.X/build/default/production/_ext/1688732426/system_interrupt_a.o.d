@@ -5,5 +5,8 @@ build/default/production/_ext/1688732426/system_interrupt_a.o:  \
 build/default/production/_ext/1688732426/system_interrupt_a.o:  \
  ../src/system_config/default/FreeRTOSConfig.h  \
  ../../../../../third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MX/ISR_Support.h  \
+ C:/Program\ Files/Microchip/MPLABX/v5.50/packs/Microchip/PIC32MX_DFP/1.5.259/include/proc/p32mx795f512l.h  \
+ C:/Program\ Files/Microchip/MPLABX/v5.50/packs/Microchip/PIC32MX_DFP/1.5.259/include/xc-pic32m.h  \
+ C:/Program\ Files/Microchip/MPLABX/v5.50/packs/Microchip/PIC32MX_DFP/1.5.259/include/xc.h  \
   \
 ../src/system_config/default/system_interrupt_a.S  \
