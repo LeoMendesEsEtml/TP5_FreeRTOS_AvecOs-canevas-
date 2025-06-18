@@ -57,7 +57,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "Mc32DriverLcd.h"
 #include "FreeRTOS.h"
 #include "queue.h"
-#include "apptemp.h"       // pour gAppQueue & APP_MESSAGE
+#include "apptemp.h" // pour gAppQueue & APP_MESSAGE
 
 extern QueueHandle_t gAppQueue;
 
@@ -160,32 +160,30 @@ void APPLCD_Tasks(void) {
         {
             lcd_init();
             lcd_bl_on();
-            lcd_clear();
             lcd_gotoxy(1, 1);
             printf_lcd("EMSY3 TP5 FreeRTOS");
             lcd_gotoxy(1, 2);
-            printf_lcd("Leo Mendes");
-            lcd_gotoxy(1, 3);
-            printf_lcd("Mattieu Bucher");
+            printf_lcd("NEG/EDA");
             applcdData.state = APPLCD_STATE_SERVICE_TASKS;
             break;
         }
         case APPLCD_STATE_SERVICE_TASKS:
         {
-            BSP_LEDOff(BSP_LED_2);
+            BSP_LEDOff(BSP_LED_2); //debug
             while (1) {
                 APP_MESSAGE msg;
                 if (xQueueReceive(gAppQueue, &msg, portMAX_DELAY) == pdTRUE) {
                     if (msg.type == MSG_TEMP) {
                         lcd_gotoxy(1, 3);
-                        printf_lcd("Temp: %5.2f C", msg.data.f);
+                        printf_lcd("Temp: %5.2f°C", msg.data.f);
                     } else if (msg.type == MSG_UART_CHAR) {
                         lcd_gotoxy(1, 4);
                         lcd_putc(msg.data.c);
                     }
                 }
             }
-            BSP_LEDOn(BSP_LED_2);
+            // Jamais atteint
+            BSP_LEDOn(BSP_LED_2); //debug
             break;
         }
         default:

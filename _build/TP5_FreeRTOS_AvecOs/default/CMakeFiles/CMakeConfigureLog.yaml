@@ -85,8 +85,8 @@ events:
     checks:
       - "Detecting CXX compile features"
     directories:
-      source: "C:/microchip/harmony/v2_06/apps/EMSY3/TP5_FreeRTOS_AvecOs-canevas-/_build/TP5_FreeRTOS_AvecOs/default/CMakeFiles/CMakeScratch/TryCompile-ttmde7"
-      binary: "C:/microchip/harmony/v2_06/apps/EMSY3/TP5_FreeRTOS_AvecOs-canevas-/_build/TP5_FreeRTOS_AvecOs/default/CMakeFiles/CMakeScratch/TryCompile-ttmde7"
+      source: "C:/microchip/harmony/v2_06/apps/EMSY3/TP5_FreeRTOS_AvecOs-canevas-/_build/TP5_FreeRTOS_AvecOs/default/CMakeFiles/CMakeScratch/TryCompile-4qjha4"
+      binary: "C:/microchip/harmony/v2_06/apps/EMSY3/TP5_FreeRTOS_AvecOs-canevas-/_build/TP5_FreeRTOS_AvecOs/default/CMakeFiles/CMakeScratch/TryCompile-4qjha4"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -96,12 +96,12 @@ events:
       variable: "CMAKE_CXX_FEATURE_TEST"
       cached: true
       stdout: |
-        Change Dir: 'C:/microchip/harmony/v2_06/apps/EMSY3/TP5_FreeRTOS_AvecOs-canevas-/_build/TP5_FreeRTOS_AvecOs/default/CMakeFiles/CMakeScratch/TryCompile-ttmde7'
+        Change Dir: 'C:/microchip/harmony/v2_06/apps/EMSY3/TP5_FreeRTOS_AvecOs-canevas-/_build/TP5_FreeRTOS_AvecOs/default/CMakeFiles/CMakeScratch/TryCompile-4qjha4'
         
-        Run Build Command(s): C:/Users/thebi/.mplab/app-finder/apps/ninja/v1.12.1/ninja.exe -v cmTC_a2836
-        [1/2] c:\\PROGRA~1\\MICROC~1\\xc32\\v2.50\\bin\\XC32-G~1.EXE   -std=c++1y -o CMakeFiles/cmTC_a2836.dir/feature_tests.cxx.obj -c C:/microchip/harmony/v2_06/apps/EMSY3/TP5_FreeRTOS_AvecOs-canevas-/_build/TP5_FreeRTOS_AvecOs/default/CMakeFiles/CMakeScratch/TryCompile-ttmde7/feature_tests.cxx
-        FAILED: CMakeFiles/cmTC_a2836.dir/feature_tests.cxx.obj 
-        c:\\PROGRA~1\\MICROC~1\\xc32\\v2.50\\bin\\XC32-G~1.EXE   -std=c++1y -o CMakeFiles/cmTC_a2836.dir/feature_tests.cxx.obj -c C:/microchip/harmony/v2_06/apps/EMSY3/TP5_FreeRTOS_AvecOs-canevas-/_build/TP5_FreeRTOS_AvecOs/default/CMakeFiles/CMakeScratch/TryCompile-ttmde7/feature_tests.cxx
+        Run Build Command(s): C:/Users/thebi/.mplab/app-finder/apps/ninja/v1.12.1/ninja.exe -v cmTC_c8bf8
+        [1/2] c:\\PROGRA~1\\MICROC~1\\xc32\\v2.50\\bin\\XC32-G~1.EXE   -std=c++1y -o CMakeFiles/cmTC_c8bf8.dir/feature_tests.cxx.obj -c C:/microchip/harmony/v2_06/apps/EMSY3/TP5_FreeRTOS_AvecOs-canevas-/_build/TP5_FreeRTOS_AvecOs/default/CMakeFiles/CMakeScratch/TryCompile-4qjha4/feature_tests.cxx
+        FAILED: CMakeFiles/cmTC_c8bf8.dir/feature_tests.cxx.obj 
+        c:\\PROGRA~1\\MICROC~1\\xc32\\v2.50\\bin\\XC32-G~1.EXE   -std=c++1y -o CMakeFiles/cmTC_c8bf8.dir/feature_tests.cxx.obj -c C:/microchip/harmony/v2_06/apps/EMSY3/TP5_FreeRTOS_AvecOs-canevas-/_build/TP5_FreeRTOS_AvecOs/default/CMakeFiles/CMakeScratch/TryCompile-4qjha4/feature_tests.cxx
         ninja: build stopped: subcommand failed.
         
       exitCode: 1
