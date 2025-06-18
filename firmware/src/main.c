@@ -55,36 +55,30 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-#include <stddef.h>                     // Defines NULL
-#include <stdbool.h>                    // Defines true
-#include <stdlib.h>                     // Defines EXIT_FAILURE
-#include "system/common/sys_module.h"   // SYS function prototypes
+#include <stddef.h>                     // Defini NULL
+#include <stdbool.h>                    // Defini true
+#include <stdlib.h>                     // Defini EXIT_FAILURE
+#include "system/common/sys_module.h"   // Prototypes des fonctions SYS
 
 
-// *****************************************************************************
-// *****************************************************************************
-// Section: Main Entry Point
-// *****************************************************************************
-// *****************************************************************************
-
+/**
+@brief Point d'entree principal de l'application
+@details
+Cette fonction initialise tous les modules MPLAB Harmony et entre dans la boucle principale pour maintenir leur fonctionnement.
+@param Aucun parametre.
+@return EXIT_FAILURE si l'execution sort de la boucle principale.
+@pre Le systeme et les modules doivent etre initialises avant d'appeler cette fonction.
+@post Le systeme execute sa boucle principale et ne retourne jamais en fonctionnement normal.
+*/
 int main ( void )
 {
-    /* Initialize all MPLAB Harmony modules, including application(s). */
-    SYS_Initialize ( NULL );
-
-
-    while ( true )
+    SYS_Initialize ( NULL ); // Initialise tous les modules MPLAB Harmony, y compris l'application
+    while ( true ) // Boucle infinie pour l'application principale
     {
-        /* Maintain state machines of all polled MPLAB Harmony modules. */
-        SYS_Tasks ( );
-
+        SYS_Tasks ( ); // Maintient les machines d'etat de tous les modules MPLAB Harmony interroges
     }
-
-    /* Execution should not come here during normal operation */
-
-    return ( EXIT_FAILURE );
+    return ( EXIT_FAILURE ); // Ne devrait jamais etre atteint en fonctionnement normal
 }
-
 
 /*******************************************************************************
  End of File

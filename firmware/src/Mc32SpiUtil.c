@@ -23,64 +23,80 @@
 #include "Mc32SpiUtil.h"
 #include "peripheral\SPI\plib_spi.h"
 
-
+/**
+@brief Ecrit un octet sur SPI1
+@details
+Cette fonction ecrit un octet sur SPI1 et attend la fin de la transmission.
+@param Val Octet a ecrire.
+@return Aucun retour.
+@pre SPI1 doit etre configure.
+@post L'octet est envoye sur SPI1.
+*/
 void spi_write1( uint8_t Val){
-   int SpiBusy;
-   
-   PLIB_SPI_BufferWrite(SPI_ID_1, Val);
-
+   int SpiBusy; // Variable pour verifier l'etat du SPI
+   PLIB_SPI_BufferWrite(SPI_ID_1, Val); // Ecrit la valeur dans le buffer SPI1
    do {
-     SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_1) ;
-   } while (SpiBusy == 1);
+     SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_1) ; // Verifie si SPI1 est occupe
+   } while (SpiBusy == 1); // Attend que SPI1 soit libre
 }
 
-
+/**
+@brief Ecrit un octet sur SPI2
+@details
+Cette fonction ecrit un octet sur SPI2 et attend la fin de la transmission.
+@param Val Octet a ecrire.
+@return Aucun retour.
+@pre SPI2 doit etre configure.
+@post L'octet est envoye sur SPI2.
+*/
 void spi_write2( uint8_t Val){
-   int SpiBusy;
-   
-   PLIB_SPI_BufferWrite(SPI_ID_2, Val);
+   int SpiBusy; // Variable pour verifier l'etat du SPI
+   PLIB_SPI_BufferWrite(SPI_ID_2, Val); // Ecrit la valeur dans le buffer SPI2
    do {
-     SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_2) ;
-   } while (SpiBusy == 1);
+     SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_2) ; // Verifie si SPI2 est occupe
+   } while (SpiBusy == 1); // Attend que SPI2 soit libre
 }
 
+/**
+@brief Lit un octet depuis SPI1
+@details
+Cette fonction ecrit un octet sur SPI1 et lit l'octet recu apres la transmission.
+@param Val Octet a ecrire (dummy ou commande).
+@return Octet recu depuis SPI1.
+@pre SPI1 doit etre configure.
+@post Retourne l'octet recu depuis SPI1.
+*/
 uint8_t spi_read1( uint8_t Val){
-   int SpiBusy;  
-   uint32_t lu;
-   
-   PLIB_SPI_BufferWrite(SPI_ID_1, Val);
-   // Attends fin transmission
+   int SpiBusy;  // Variable pour verifier l'etat du SPI
+   uint32_t lu; // Variable pour stocker la valeur recue
+   PLIB_SPI_BufferWrite(SPI_ID_1, Val); // Ecrit la valeur dans le buffer SPI1
    do {
-        SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_1) ;
-   } while (SpiBusy == 1);
-   
-   // Attend arrivée dans fifo
-   while (PLIB_SPI_ReceiverFIFOIsEmpty(SPI_ID_1));
-#ifdef MARKER_READ
-   LED3_W  = 1;
-#endif
-   lu = PLIB_SPI_BufferRead(SPI_ID_1);
-#ifdef MARKER_READ
-   LED3_W  = 0;
-#endif
-   return lu;
+        SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_1) ; // Verifie si SPI1 est occupe
+   } while (SpiBusy == 1); // Attend que SPI1 soit libre
+   while (PLIB_SPI_ReceiverFIFOIsEmpty(SPI_ID_1)); // Attend la donnee dans la FIFO
+   lu = PLIB_SPI_BufferRead(SPI_ID_1); // Lit la valeur recue
+   return lu; // Retourne la valeur recue
 }
 
- uint8_t spi_read2( uint8_t Val){
-   int SpiBusy;
-   uint8_t lu;
-   
-   PLIB_SPI_BufferWrite(SPI_ID_2, Val);
-  
+/**
+@brief Lit un octet depuis SPI2
+@details
+Cette fonction ecrit un octet sur SPI2 et lit l'octet recu apres la transmission.
+@param Val Octet a ecrire (dummy ou commande).
+@return Octet recu depuis SPI2.
+@pre SPI2 doit etre configure.
+@post Retourne l'octet recu depuis SPI2.
+*/
+uint8_t spi_read2( uint8_t Val){
+   int SpiBusy; // Variable pour verifier l'etat du SPI
+   uint8_t lu; // Variable pour stocker la valeur recue
+   PLIB_SPI_BufferWrite(SPI_ID_2, Val); // Ecrit la valeur dans le buffer SPI2
    do {
-      SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_2) ;
-   } while (SpiBusy == 1);
-   
-   // Attend arrivée dans fifo
-   while (PLIB_SPI_ReceiverFIFOIsEmpty(SPI_ID_2));
-   
-   lu = PLIB_SPI_BufferRead(SPI_ID_2);
-   return lu;
+      SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_2) ; // Verifie si SPI2 est occupe
+   } while (SpiBusy == 1); // Attend que SPI2 soit libre
+   while (PLIB_SPI_ReceiverFIFOIsEmpty(SPI_ID_2)); // Attend la donnee dans la FIFO
+   lu = PLIB_SPI_BufferRead(SPI_ID_2); // Lit la valeur recue
+   return lu; // Retourne la valeur recue
 }
 
 

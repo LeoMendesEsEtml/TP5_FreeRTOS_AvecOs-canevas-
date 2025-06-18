@@ -63,72 +63,75 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "apptemp.h"
 #include "applcd.h"
 #include "system_definitions.h"
-
 #include "queue.h"
 #include "semphr.h"
 extern QueueHandle_t queueTx;
 extern SemaphoreHandle_t semIntTimer;
 
-
-typedef enum { 
-    MSG_TEMP = 1, 
-    MSG_UARTRX = 2 
+typedef enum {
+    MSG_TEMP = 1,
+    MSG_UARTRX = 2
 } msg_type_t;
 
 #define MSG_PAYLOAD_LEN 16U
-typedef struct { 
-    msg_type_t type; 
-    char txt[MSG_PAYLOAD_LEN]; 
+
+typedef struct {
+    msg_type_t type;
+    char txt[MSG_PAYLOAD_LEN];
 } app_msg_t;
 
-
-
-
-
-// *****************************************************************************
-// *****************************************************************************
-// Section: System Interrupt Vector Functions
-// *****************************************************************************
-// *****************************************************************************
+/**
+@brief Routine d'interruption USART
+@details
+Cette fonction gere l'interruption USART, lit les donnees recues et envoie un message a la queue si necessaire.
+@param Aucun parametre.
+@return Aucun retour.
+@pre USART et FreeRTOS doivent etre initialises.
+@post Les donnees sont lues et envoyees a la queue si recues.
+*/
 void IntHandlerDrvUsartInstance0(void)
 {
-    BaseType_t xNeedSwitch = pdFALSE;
-    app_msg_t  m;       m.type = MSG_UARTRX;
+    BaseType_t xNeedSwitch = pdFALSE; // Variable pour changement de contexte
+    app_msg_t  m;       m.type = MSG_UARTRX; // Structure message et type
 
     /* Tâches Harmony (optionnel mais conseillé) */
-    DRV_USART_TasksError   (sysObj.drvUsart0);
-    DRV_USART_TasksReceive (sysObj.drvUsart0);
+    DRV_USART_TasksError   (sysObj.drvUsart0); // Gere les erreurs USART
+    DRV_USART_TasksReceive (sysObj.drvUsart0); // Gere la reception USART
 
     /* Lecture FIFO */
-    size_t i = 0;
-    while (PLIB_USART_ReceiverDataIsAvailable(USART_ID_1) &&
-           i < MSG_PAYLOAD_LEN-1)
+    size_t i = 0; // Index pour les donnees recues
+    while (PLIB_USART_ReceiverDataIsAvailable(USART_ID_1) && i < MSG_PAYLOAD_LEN-1) // Tant que donnees disponibles et place
     {
-        m.txt[i++] = PLIB_USART_ReceiverByteReceive(USART_ID_1);
+        m.txt[i++] = PLIB_USART_ReceiverByteReceive(USART_ID_1); // Lit un octet du USART
     }
-    m.txt[i] = '\0';
+    m.txt[i] = '\0'; // Termine la chaine
 
-    if (i)                     /* n?envoie que s?il y a vraiment des octets */
-        xQueueSendFromISR(queueTx, &m, &xNeedSwitch);
+    if (i) // Si des donnees ont ete recues
+        xQueueSendFromISR(queueTx, &m, &xNeedSwitch); // Envoie le message a la queue depuis l'ISR
 
-    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_RECEIVE);
-    portEND_SWITCHING_ISR(xNeedSwitch);
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_USART_1_RECEIVE); // Efface le flag d'interruption
+    portEND_SWITCHING_ISR(xNeedSwitch); // Termine l'ISR et change de contexte si besoin
 }
- 
 
-
+/**
+@brief Routine d'interruption Timer
+@details
+Cette fonction gere l'interruption du timer et donne un semaphore pour signaler un evenement timer.
+@param Aucun parametre.
+@return Aucun retour.
+@pre Timer et FreeRTOS doivent etre initialises.
+@post Le semaphore est donne depuis l'ISR pour signaler l'evenement timer.
+*/
 void IntHandlerDrvTmrInstance0(void)
 {
-   
-    BaseType_t xNeedSwitch = pdFALSE;
+    BaseType_t xNeedSwitch = pdFALSE; // Variable pour changement de contexte
 
-    xSemaphoreGiveFromISR(semIntTimer, &xNeedSwitch);
+    xSemaphoreGiveFromISR(semIntTimer, &xNeedSwitch); // Donne le semaphore depuis l'ISR
 
-    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_TIMER_2);
-    portEND_SWITCHING_ISR(xNeedSwitch);
+    PLIB_INT_SourceFlagClear(INT_ID_0, INT_SOURCE_TIMER_2); // Efface le flag d'interruption
+    portEND_SWITCHING_ISR(xNeedSwitch); // Termine l'ISR et change de contexte si besoin
 }
 
-
- /*******************************************************************************
+/*******************************************************************************
  End of File
 */

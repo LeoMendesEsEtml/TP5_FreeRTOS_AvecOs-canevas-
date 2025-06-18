@@ -59,35 +59,10 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 #include "queue.h"
 #include <stdio.h>
 
-
-// *****************************************************************************
-// *****************************************************************************
-// Section: Global Data Definitions
-// *****************************************************************************
-// *****************************************************************************
-
-// *****************************************************************************
-/* Application Data
-
-  Summary:
-    Holds application data
-
-  Description:
-    This structure holds the application's data.
-
-  Remarks:
-    This structure should be initialized by the APP_Initialize function.
-    
-    Application strings and buffers are be defined outside this structure.
- */
-
 APPTEMP_DATA apptempData;
 SemaphoreHandle_t semIntTimer;
 extern QueueHandle_t queueTx;
 
-
-
-/* ??? Messages communs (ISR <-> tâches) ??? */
 typedef enum { MSG_TEMP = 1, MSG_UARTRX = 2 } msg_type_t;
 #define MSG_PAYLOAD_LEN 16U
 typedef struct {
@@ -95,121 +70,67 @@ typedef struct {
     char       txt[MSG_PAYLOAD_LEN];
 } app_msg_t;
 
-
 QueueHandle_t queueTx = NULL;
 SemaphoreHandle_t semIntTimer = NULL; 
-// *****************************************************************************
-// *****************************************************************************
-// Section: Application Callback Functions
-// *****************************************************************************
-// *****************************************************************************
 
-/* TODO:  Add any necessary callback functions.
- */
-
-// *****************************************************************************
-// *****************************************************************************
-// Section: Application Local Functions
-// *****************************************************************************
-// *****************************************************************************
-
-
-// *****************************************************************************
-// *****************************************************************************
-// Section: Application Initialization and State Machine Functions
-// *****************************************************************************
-// *****************************************************************************
-
-/*******************************************************************************
-  Function:
-    void APPTEMP_Initialize ( void )
-
-  Remarks:
-    See prototype in apptemp.h.
- */
-
+/**
+@brief Initialise le module temperature
+@details
+Cette fonction place la machine d'etat du module temperature dans son etat initial.
+@param Aucun parametre.
+@return Aucun retour.
+@pre Doit etre appelee avant toute utilisation des fonctions de ce module.
+@post Le module temperature est pret a fonctionner.
+*/
 void APPTEMP_Initialize(void) {
-    /* Place the App state machine in its initial state. */
-    apptempData.state = APPTEMP_STATE_INIT;
-
+    apptempData.state = APPTEMP_STATE_INIT; // Met l'etat initial
 }
 
-/******************************************************************************
-  Function:
-    void APPTEMP_Tasks ( void )
-
-  Remarks:
-    See prototype in apptemp.h.
- */
-
+/**
+@brief Tache principale de gestion de la temperature
+@details
+Cette fonction implemente la machine d'etat et la logique principale du module temperature. Elle gere l'initialisation, la lecture du capteur et l'envoi des messages.
+@param Aucun parametre.
+@return Aucun retour.
+@pre Le systeme et le module temperature doivent etre initialises avant d'appeler cette fonction.
+@post Les messages de temperature sont envoyes a chaque acquisition.
+*/
 void APPTEMP_Tasks(void) {
-//    int16_t iTemp;
-//    float fTemp;
-//    char msg[7];
-    int16_t  iTemp;
-    float    fTemp;
-    app_msg_t m;
-
-    /* Check the application's current state. */
-    switch (apptempData.state) {
-            /* Application's initial state. */
+    int16_t  iTemp; // Variable pour la temperature brute
+    float    fTemp; // Variable pour la temperature convertie
+    app_msg_t m; // Structure message
+    switch (apptempData.state) { // Teste l'etat courant
         case APPTEMP_STATE_INIT:
         {
-            DRV_TMR0_Start();
-            SPI_InitLM70();
-            semIntTimer = xSemaphoreCreateBinary();
-            // Initialisation
-            queueTx = xQueueCreate(16, sizeof(app_msg_t));
-
-
-            apptempData.state = APPTEMP_STATE_SERVICE_TASKS;
-
+            DRV_TMR0_Start(); // Demarre le timer
+            SPI_InitLM70(); // Initialise le capteur LM70
+            semIntTimer = xSemaphoreCreateBinary(); // Cree le semaphore
+            queueTx = xQueueCreate(16, sizeof(app_msg_t)); // Cree la queue
+            apptempData.state = APPTEMP_STATE_SERVICE_TASKS; // Passe a l'etat service
             break;
         }
-
         case APPTEMP_STATE_SERVICE_TASKS:
         {
-            BSP_LEDOff(BSP_LED_1); //debug           
-
-            //attente semaphore (portMAX_DELAY = indéfiniment)
-            if (xSemaphoreTake(semIntTimer, portMAX_DELAY)) {
-                // lecture température 
-                iTemp = SPI_ReadRawTempLM70();
-                LM70_ConvRawToDeg(iTemp, &fTemp);
-                // Multiplier par 100 pour capturer deux décimales
-                int tempInt = (int) (fTemp * 100);
-                // Séparer la partie entière et la partie décimale
-                int ent = tempInt / 100;
-                int dec = abs(tempInt % 100); // Toujours positif
-//                sprintf(msg, "%+d.%02d", ent, dec);
-                
-                
-                m.type = MSG_TEMP;
-                snprintf(m.txt, sizeof m.txt, "%+d.%02d", ent, dec);
-                //Placement d'un élément dans la queue
-                xQueueSend(queueTx, &m, 0U);
+            BSP_LEDOff(BSP_LED_1); // Eteint la LED debug
+            if (xSemaphoreTake(semIntTimer, portMAX_DELAY)) { // Attend le semaphore
+                iTemp = SPI_ReadRawTempLM70(); // Lit la temperature brute
+                LM70_ConvRawToDeg(iTemp, &fTemp); // Convertit en degres
+                int tempInt = (int) (fTemp * 100); // Multiplie pour garder 2 decimales
+                int ent = tempInt / 100; // Partie entiere
+                int dec = abs(tempInt % 100); // Partie decimale positive
+                m.type = MSG_TEMP; // Type message temperature
+                snprintf(m.txt, sizeof m.txt, "%+d.%02d", ent, dec); // Formate la chaine
+                xQueueSend(queueTx, &m, 0U); // Envoie le message dans la queue
             }
-
-
-
-            BSP_LEDOn(BSP_LED_1); //debug
-
+            BSP_LEDOn(BSP_LED_1); // Allume la LED debug
             break;
         }
-
-            /* TODO: implement your application state machine.*/
-
-
-            /* The default state should never be executed. */
         default:
         {
-            /* TODO: Handle error in application's state machine. */
             break;
         }
     }
 }
-
-
 
 /*******************************************************************************
  End of File
