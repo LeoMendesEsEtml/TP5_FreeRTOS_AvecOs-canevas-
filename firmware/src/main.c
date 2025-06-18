@@ -69,6 +69,16 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
+/**
+ * @file main.c
+ * @brief Point d'entree principal du programme
+ *
+ * @details
+ * Cette fonction initialise tous les modules Harmony et lance la boucle principale qui maintient les taches du systeme
+ *
+ * @pre Le materiel doit etre correctement connecte et alimente
+ * @post Les modules Harmony et les taches FreeRTOS sont executes
+ */
 int main ( void )
 {
     /* Initialize all MPLAB Harmony modules, including application(s). */
