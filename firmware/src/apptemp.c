@@ -112,7 +112,9 @@ APPTEMP_DATA apptempData;
 
 APPTEMP_DATA apptempData;
 QueueHandle_t gAppQueue;            // rendu global
-
+apptemp_Data.xQueue = xQueueCreate(APP_QUEUE_LENGTH,sizeof(APP_MESSAGE));
+gAppQueue = apptempData.xQueue;             // exportée
+configASSERT(gAppQueue);                    // sûreté
 void APPTEMP_Initialize (void)
 {
     apptempData.state = APPTEMP_STATE_INIT;
