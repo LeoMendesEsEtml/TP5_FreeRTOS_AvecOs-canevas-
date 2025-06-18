@@ -160,7 +160,7 @@ void APPLCD_Tasks(void) {
         {
             lcd_init();
             lcd_bl_on();
-            lcd_clear(); // Nettoie l'affichage au démarrage
+            lcd_clear();
             lcd_gotoxy(1, 1);
             printf_lcd("EMSY3 TP5 FreeRTOS");
             lcd_gotoxy(1, 2);
@@ -172,29 +172,24 @@ void APPLCD_Tasks(void) {
         }
         case APPLCD_STATE_SERVICE_TASKS:
         {
-            BSP_LEDOff(BSP_LED_2); // debug
+            BSP_LEDOff(BSP_LED_2);
             while (1) {
-                APP_MESSAGE msg; // message reçu (structure typée)
+                APP_MESSAGE msg;
                 if (xQueueReceive(gAppQueue, &msg, portMAX_DELAY) == pdTRUE) {
-                    // Décodage du type de message
                     if (msg.type == MSG_TEMP) {
                         lcd_gotoxy(1, 3);
-                        printf_lcd("Temp: %5.2f C", msg.data.f); // Affiche la température
+                        printf_lcd("Temp: %5.2f C", msg.data.f);
                     } else if (msg.type == MSG_UART_CHAR) {
                         lcd_gotoxy(1, 4);
-                        lcd_putc(msg.data.c); // Affiche le caractère UART
-                    } else {
-                        // Autre type de message : ignorer ou afficher une erreur
+                        lcd_putc(msg.data.c);
                     }
                 }
             }
-            // Jamais atteint
-            BSP_LEDOn(BSP_LED_2); // debug
+            BSP_LEDOn(BSP_LED_2);
             break;
         }
         default:
         {
-            // Gestion d'erreur d'état inattendu
             break;
         }
     }
