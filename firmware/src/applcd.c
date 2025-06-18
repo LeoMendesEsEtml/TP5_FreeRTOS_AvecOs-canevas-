@@ -52,19 +52,47 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // Section: Included Files 
 // *****************************************************************************
 // *****************************************************************************
-// Inclusion du header principal du module LCD
-#include "applcd.h" // Fonctions et types du module LCD
-// Inclusion du driver LCD
-#include "Mc32DriverLcd.h" // Fonctions d'affichage LCD
-// Inclusion du module temperature (pour coherence inter-tache)
-#include "apptemp.h" // Types partages temperature
-// Inclusion de FreeRTOS queue
-#include "queue.h" // Gestion des files d'attente FreeRTOS
 
-// Declaration de la structure de donnees globale du module LCD
-APPLCD_DATA applcdData; // Donnees du module LCD
-// Declaration externe de la queue partagee
-extern QueueHandle_t queueTx; // File d'attente partagee pour messages
+#include "applcd.h"
+#include "Mc32DriverLcd.h"
+#include "apptemp.h"
+#include "queue.h"
+
+// *****************************************************************************
+// *****************************************************************************
+// Section: Global Data Definitions
+// *****************************************************************************
+// *****************************************************************************
+
+// *****************************************************************************
+/* Application Data
+
+  Summary:
+    Holds application data
+
+  Description:
+    This structure holds the application's data.
+
+  Remarks:
+    This structure should be initialized by the APP_Initialize function.
+    
+    Application strings and buffers are be defined outside this structure.
+ */
+
+APPLCD_DATA applcdData;
+//QueueHandle_t queueTx;
+extern QueueHandle_t queueTx;
+
+/* essages communs (ISR <-> tâches) */
+typedef enum { 
+    MSG_TEMP = 1, 
+    MSG_UARTRX = 2 
+} msg_type_t;
+#define MSG_PAYLOAD_LEN 16U
+typedef struct {
+    msg_type_t type;
+    char       txt[MSG_PAYLOAD_LEN];
+} app_msg_t;
 
 /**
 @brief Initialise le module LCD

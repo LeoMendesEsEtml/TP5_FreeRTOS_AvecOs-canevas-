@@ -51,27 +51,6 @@ Implemente la machine d'etat et la logique principale du module LCD.
 */
 void APPLCD_Tasks(void);
 
-/**
-@brief Types de messages utilises pour la communication inter-tache
-*/
-typedef enum {
-    MSG_TEMP = 1, // Message de temperature
-    MSG_UARTRX = 2 // Message de reception UART
-} msg_type_t;
-
-/**
-@brief Taille maximale du champ texte dans un message
-*/
-#define MSG_PAYLOAD_LEN 16U
-
-/**
-@brief Structure de message pour la communication inter-tache
-*/
-typedef struct {
-    msg_type_t type; // Type de message
-    char txt[MSG_PAYLOAD_LEN]; // Donnees du message
-} app_msg_t;
-
 #ifdef __cplusplus
 }
 #endif
