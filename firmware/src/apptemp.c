@@ -47,15 +47,32 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // DOM-IGNORE-END
 
 
+/**
+ * @file apptemp.c
+ * @brief Module de gestion de la temperature avec FreeRTOS
+ *
+ * @details
+ * Ce fichier contient l'implementation de la tache de lecture de temperature,
+ * la synchronisation via semaphore, et l'envoi des donnees dans une queue
+ * Il gere aussi l'initialisation des objets FreeRTOS et la communication SPI avec le LM70
+ *
+ * @pre Le systeme doit etre initialise avant d'utiliser ces fonctions
+ * @post Les donnees de temperature sont envoyees periodiquement dans la queue
+ */
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Included Files 
 // *****************************************************************************
 // *****************************************************************************
 
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "semphr.h"
+
 #include "apptemp.h"
 #include "Mc32gestSpiLM70.h"
-
+#include <stdio.h>
 
 // *****************************************************************************
 // *****************************************************************************
@@ -63,23 +80,15 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 // *****************************************************************************
 
-// *****************************************************************************
-/* Application Data
-
-  Summary:
-    Holds application data
-
-  Description:
-    This structure holds the application's data.
-
-  Remarks:
-    This structure should be initialized by the APP_Initialize function.
-    
-    Application strings and buffers are be defined outside this structure.
-*/
-
+/**
+ * @brief Donnees de l'application pour la gestion de la temperature.
+ *
+ * @details
+ * Structure globale contenant l'etat et les objets FreeRTOS necessaires.
+ */
 APPTEMP_DATA apptempData;
-        
+QueueHandle_t gAppQueue = NULL;
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Callback Functions
@@ -110,26 +119,35 @@ APPTEMP_DATA apptempData;
     See prototype in apptemp.h.
  */
 
-APPTEMP_DATA apptempData;
-QueueHandle_t gAppQueue;            // rendu global
-
+/**
+ * @brief Initialise le module temperature
+ *
+ * @details
+ * Cette fonction cree le semaphore et la queue FreeRTOS, initialise l'etat de l'application et demarre les timers necessaires.
+ *
+ * @param Aucun parametre.
+ * @return Aucun retour.
+ *
+ * @pre Doit etre appelee avant toute utilisation des fonctions de ce module.
+ * @post Les objets FreeRTOS sont prets et les timers sont demarres.
+ */
 void APPTEMP_Initialize (void)
 {
-    apptempData.state = APPTEMP_STATE_INIT;
+    apptempData.state = APPTEMP_STATE_INIT; // met l'etat initial
 
     /* --- objets FreeRTOS --- */
-    apptempData.xTempSem = xSemaphoreCreateBinary();
-    apptempData.xQueue   = xQueueCreate(APP_QUEUE_LENGTH, sizeof(APP_MESSAGE));
+    apptempData.xTempSem = xSemaphoreCreateBinary(); // cree le semaphore binaire
+    apptempData.xQueue   = xQueueCreate(APP_QUEUE_LENGTH, sizeof(APP_MESSAGE)); // cree la queue
 
-    configASSERT(apptempData.xTempSem && apptempData.xQueue);
+    configASSERT(apptempData.xTempSem && apptempData.xQueue); // verifie la creation
 
     /* rendre la queue visible aux autres modules */
-    gAppQueue = apptempData.xQueue;
+    gAppQueue = apptempData.xQueue; // partage la queue globalement
 
     /* on démarre vide */
-    xSemaphoreTake(apptempData.xTempSem, 0);
-    DRV_TMR0_Start();
-    DRV_TMR1_Start();
+    xSemaphoreTake(apptempData.xTempSem, 0); // prend le semaphore pour demarrer a zero
+    DRV_TMR0_Start(); // demarre le timer 0
+    DRV_TMR1_Start(); // demarre le timer 1
 }
 
 
@@ -142,53 +160,56 @@ void APPTEMP_Initialize (void)
     See prototype in apptemp.h.
  */
 
+/**
+ * @brief Tache FreeRTOS de gestion de la temperature
+ *
+ * @details
+ * Cette fonction attend le semaphore libere par l'interruption timer, lit la temperature via SPI, formate un message et l'envoie dans la queue. Elle boucle indefiniment dans l'etat de service.
+ *
+ * @param Aucun parametre.
+ * @return Aucun retour.
+ *
+ * @pre APPTEMP_Initialize doit avoir ete appelee.
+ * @post Les messages de temperature sont envoyes dans la queue a chaque periode.
+ */
 void APPTEMP_Tasks ( void )
 {
-    
-    /* Check the application's current state. */
+    // Vérification de l'état courant de l'application
     switch ( apptempData.state )
     {
-        /* Application's initial state. */
         case APPTEMP_STATE_INIT:
         {
-            SPI_InitLM70();   
-            
-            apptempData.state = APPTEMP_STATE_SERVICE_TASKS;
-
+            SPI_InitLM70();   // initialise le capteur LM70
+            apptempData.state = APPTEMP_STATE_SERVICE_TASKS; // passe a l'etat service
             break;
         }
-
         case APPTEMP_STATE_SERVICE_TASKS:
         {
-            BSP_LEDOff(BSP_LED_1); //debug           
-
+            BSP_LEDOff(BSP_LED_1); // eteint la led 1
             while (1) {
-                /* 1- Attente du sémaphore (libéré par le timer) */
+                // 1- Attente du semaphore (libere par le timer)
                 if (xSemaphoreTake(apptempData.xTempSem, portMAX_DELAY) == pdTRUE) {
-                    /* 2- Lecture du LM70 */
-                    int16_t raw = SPI_ReadRawTempLM70();
+                    // 2- Lecture du LM70
+                    int16_t raw = SPI_ReadRawTempLM70(); // lit la temperature brute
                     float degC;
-                    LM70_ConvRawToDeg(raw, &degC);
-
-                    /* 3- Encapsulation & 4- envoi dans la queue */
-                    APP_MESSAGE msg = {.type = MSG_TEMP};
-                    msg.data.f = degC;
-                    xQueueSend(apptempData.xQueue, &msg, 0);
+                    LM70_ConvRawToDeg(raw, &degC); // convertit en degres Celsius
+                    // 3- Encapsulation & 4- envoi dans la queue
+                    APP_MESSAGE msg = {.type = MSG_TEMP}; // prepare le message
+                    msg.data.f = degC; // stocke la temperature
+                    xQueueSend(gAppQueue, &msg, 0); // envoie dans la queue globale
                 }
-            }            
-            BSP_LEDOn(BSP_LED_1); //debug
-            
+            }
+            BSP_LEDOn(BSP_LED_1); // allume la led 1 (jamais atteint)
             break;
         }
-
-        /* TODO: implement your application state machine.*/
-        
-
-        /* The default state should never be executed. */
         default:
         {
-            /* TODO: Handle error in application's state machine. */
+            // gestion d'erreur d'etat inattendu
             break;
         }
     }
 }
+// *****************************************************************************
+// *****************************************************************************
+// End of File
+// *****************************************************************************

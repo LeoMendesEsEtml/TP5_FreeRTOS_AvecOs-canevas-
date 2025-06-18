@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<project>                                  
+  <executable name="C:microchipharmonyv2_06appsEMSY3TP5_FreeRTOS_AvecOs-canevas-outTP5_FreeRTOS_AvecOsdefault.elf">                 
+    <memory name="program">                 
+      <units>bytes</units>                 
+      <length>531968</length>                 
+      <used>45728</used>                     
+      <free>486240</free>                     
+    </memory>                              
+    <memory name="data">              
+      <units>bytes</units>                 
+      <length>131072</length>                 
+      <used>22784</used>                     
+      <free>108288</free>                     
+    </memory>                              
+  </executable>                            
+</project>                                 

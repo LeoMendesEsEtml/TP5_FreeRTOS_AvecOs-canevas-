@@ -1,20 +1,15 @@
-// Mc32SpiUtil.C
-// Utilitaire  SPI
-//
-//	Description : 	fonctions SPI CCS like
-//	Auteur 		: 	C. HUBER
-//      Création	: 	08.04.2014
-//      Modifications   :       09.02.2015 CHR
+/*
+ * @file Mc32SpiUtil.c
+ * @brief Fonctions utilitaires pour la gestion du bus SPI
+ *
+ * @details
+ * Ce fichier contient des fonctions utilitaires pour configurer, envoyer et recevoir
+ * des donnees sur le bus SPI Il est utilise par les modules capteurs et autres peripheriques SPI
+ *
+ * @pre Le SPI doit etre initialise avant utilisation
+ * @post Permet la communication SPI fiable avec les peripheriques
+ */
 
-//  LISTE DES MODIFICATIONS :
-//      Utilisation des stdint                  09.02.2015 CHR
-//      Adaptation à la plib_spi                09.02.2015 CHR
-//      maj version compilateur et Harmony      24.05.2016 CHR
-//      Correction de la séquence de lecture    25.05.2016 CHR
-//      Version KIT     PCB 11020_B
-//	Version		:	V1.2
-//	Compilateur	:	XC32 V1.40 + Harmony 1.06
-//
 /*--------------------------------------------------------*/
 
 // #define MARKER_READ 1
@@ -24,63 +19,54 @@
 #include "peripheral\SPI\plib_spi.h"
 
 
-void spi_write1( uint8_t Val){
-   int SpiBusy;
-   
-   PLIB_SPI_BufferWrite(SPI_ID_1, Val);
-
-   do {
-     SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_1) ;
-   } while (SpiBusy == 1);
+// fonction pour ecrire une donnee sur le bus spi 1
+void spi_write1( uint8_t Val){ // ecrit la valeur sur le bus spi 1
+   int SpiBusy; // variable pour verifier si le spi est occupe
+   PLIB_SPI_BufferWrite(SPI_ID_1, Val); // ecrit la donnee dans le buffer spi
+   do { // boucle pour attendre la fin de la transmission
+     SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_1) ; // verifie si le spi est occupe
+   } while (SpiBusy == 1); // continue tant que le spi est occupe
 }
 
-
-void spi_write2( uint8_t Val){
-   int SpiBusy;
-   
-   PLIB_SPI_BufferWrite(SPI_ID_2, Val);
-   do {
-     SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_2) ;
-   } while (SpiBusy == 1);
+// fonction pour ecrire une donnee sur le bus spi 2
+void spi_write2( uint8_t Val){ // ecrit la valeur sur le bus spi 2
+   int SpiBusy; // variable pour verifier si le spi est occupe
+   PLIB_SPI_BufferWrite(SPI_ID_2, Val); // ecrit la donnee dans le buffer spi
+   do { // boucle pour attendre la fin de la transmission
+     SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_2) ; // verifie si le spi est occupe
+   } while (SpiBusy == 1); // continue tant que le spi est occupe
 }
 
-uint8_t spi_read1( uint8_t Val){
-   int SpiBusy;  
-   uint32_t lu;
-   
-   PLIB_SPI_BufferWrite(SPI_ID_1, Val);
-   // Attends fin transmission
-   do {
-        SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_1) ;
-   } while (SpiBusy == 1);
-   
-   // Attend arrivée dans fifo
-   while (PLIB_SPI_ReceiverFIFOIsEmpty(SPI_ID_1));
+// fonction pour lire une donnee sur le bus spi 1
+uint8_t spi_read1( uint8_t Val){ // lit une donnee sur le bus spi 1
+   int SpiBusy;  // variable pour verifier si le spi est occupe
+   uint32_t lu; // variable pour stocker la donnee lue
+   PLIB_SPI_BufferWrite(SPI_ID_1, Val); // ecrit la donnee dans le buffer spi
+   do { // boucle pour attendre la fin de la transmission
+        SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_1) ; // verifie si le spi est occupe
+   } while (SpiBusy == 1); // continue tant que le spi est occupe
+   while (PLIB_SPI_ReceiverFIFOIsEmpty(SPI_ID_1)); // attend que la donnee arrive dans la fifo
 #ifdef MARKER_READ
-   LED3_W  = 1;
+   LED3_W  = 1; // allume la led pour marquer la lecture
 #endif
-   lu = PLIB_SPI_BufferRead(SPI_ID_1);
+   lu = PLIB_SPI_BufferRead(SPI_ID_1); // lit la donnee du buffer spi
 #ifdef MARKER_READ
-   LED3_W  = 0;
+   LED3_W  = 0; // eteint la led apres la lecture
 #endif
-   return lu;
+   return lu; // retourne la donnee lue
 }
 
- uint8_t spi_read2( uint8_t Val){
-   int SpiBusy;
-   uint8_t lu;
-   
-   PLIB_SPI_BufferWrite(SPI_ID_2, Val);
-  
-   do {
-      SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_2) ;
-   } while (SpiBusy == 1);
-   
-   // Attend arrivée dans fifo
-   while (PLIB_SPI_ReceiverFIFOIsEmpty(SPI_ID_2));
-   
-   lu = PLIB_SPI_BufferRead(SPI_ID_2);
-   return lu;
+// fonction pour lire une donnee sur le bus spi 2
+uint8_t spi_read2( uint8_t Val){ // lit une donnee sur le bus spi 2
+   int SpiBusy; // variable pour verifier si le spi est occupe
+   uint8_t lu; // variable pour stocker la donnee lue
+   PLIB_SPI_BufferWrite(SPI_ID_2, Val); // ecrit la donnee dans le buffer spi
+   do { // boucle pour attendre la fin de la transmission
+      SpiBusy =  PLIB_SPI_IsBusy(SPI_ID_2) ; // verifie si le spi est occupe
+   } while (SpiBusy == 1); // continue tant que le spi est occupe
+   while (PLIB_SPI_ReceiverFIFOIsEmpty(SPI_ID_2)); // attend que la donnee arrive dans la fifo
+   lu = PLIB_SPI_BufferRead(SPI_ID_2); // lit la donnee du buffer spi
+   return lu; // retourne la donnee lue
 }
 
 

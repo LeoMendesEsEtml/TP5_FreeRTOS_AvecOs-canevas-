@@ -53,6 +53,18 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
  *******************************************************************************/
 // DOM-IGNORE-END
 
+/**
+ * @file system_interrupt.c
+ * @brief Gestion des interruptions système (Timer, UART) pour FreeRTOS.
+ *
+ * @details
+ * Ce fichier contient les routines d'interruption pour le timer et l'UART.
+ * Les interruptions libèrent le sémaphore ou envoient des messages dans la queue selon le cas.
+ *
+ * @pre Les périphériques doivent être initialisés et les objets FreeRTOS créés.
+ * @post Les tâches sont synchronisées via sémaphore ou queue après chaque interruption.
+ */
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: Included Files
@@ -74,6 +86,13 @@ extern APPTEMP_DATA apptempData;    // déjà déclaré dans apptemp.c
 // Section: System Interrupt Vector Functions
 // *****************************************************************************
 // *****************************************************************************
+/**
+ * @brief Gestionnaire d'interruption pour l'instance 0 de l'USART.
+ *
+ * @details
+ * Cette fonction gère les interruptions de transmission, réception et erreur de l'USART.
+ * Elle envoie également les caractères reçus à la tâche appropriée via une queue.
+ */
 void IntHandlerDrvUsartInstance0(void)
 {
     DRV_USART_TasksTransmit(sysObj.drvUsart0);
@@ -91,7 +110,15 @@ void IntHandlerDrvUsartInstance0(void)
     }
     portEND_SWITCHING_ISR(xHPTaskWoken);
 }
+
 /* === Timer 2 : instance 0  ============================================= */
+/**
+ * @brief Gestionnaire d'interruption pour l'instance 0 du Timer.
+ *
+ * @details
+ * Cette fonction gère l'interruption du Timer 2. Elle libère le sémaphore associé à la
+ * température et effectue un basculement de la LED pour un témoin visuel.
+ */
 void IntHandlerDrvTmrInstance0(void)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
@@ -110,6 +137,13 @@ void IntHandlerDrvTmrInstance0(void)
 }
 
 /* === Timer 3 : instance 1  ============================================= */
+/**
+ * @brief Gestionnaire d'interruption pour l'instance 1 du Timer.
+ *
+ * @details
+ * Cette fonction gère l'interruption du Timer 3. Elle libère le sémaphore associé à la
+ * température.
+ */
 void IntHandlerDrvTmrInstance1(void)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
